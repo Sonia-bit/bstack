@@ -19,7 +19,7 @@ jobs:
       - name: Set Node.js 16.x
         uses: actions/setup-node@master
         with:
-          version: 16.x
+          node-version: 16.x
       - name: 'Checkout the repository'
         uses: actions/checkout@v2
       - name: 'Building web application to be tested'
