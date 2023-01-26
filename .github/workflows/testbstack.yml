@@ -1,34 +1,30 @@
-name: Github Actions Example
-
-on:
-  pull_request:
-  push:
-    branches: 
-      - master
-
+name: 'BrowserStack Test'
+on: [push, pull_request]
 jobs:
-  test:
-    name: Running Units Tests
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [14.x, 16.x, 18.x]
-
+  ubuntu-job:
+    name: 'BrowserStack Test on Ubuntu'
+    runs-on: ubuntu-latest  # Can be self-hosted runner also
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node-version }}
-    - name: 'BrowserStack Env Setup'  # Invokes the setup-env action
-      uses: browserstack/github-actions/setup-env@master
-      with:
-        username:  ${{ secrets.BROWSERSTACK_USERNAME }}
-        access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-    - name: 'BrowserStack Local Tunnel Setup'  # Invokes the setup-local action
-      uses: browserstack/github-actions/setup-local@master
-      with:
-        local-testing: start
-        local-identifier: random
-    - name: Install
-      run: npm install selenium-webdriver
-    - name: Test
-      run: npm run test
+      - name: 'BrowserStack Env Setup'  # Invokes the setup-env action
+        uses: browserstack/github-actions/setup-env@master
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+      - name: 'BrowserStack Local Tunnel Setup'  # Invokes the setup-local action
+        uses: browserstack/github-actions/setup-local@master
+        with:
+          local-testing: start
+          local-identifier: random
+# The next 3 steps are for building the web application to be tested and starting the web server on the runner environment
+      - name: 'Checkout the repository'
+        uses: actions/checkout@v2
+      - name: 'Building web application to be tested'
+        run: npm install selenium web-driver
+      - name: 'Running application under test'
+        run: ./node_modules/.bin/http-server -p 8099 &
+      - name: 'Running test on BrowserStack'  # Invokes the actual test script that would run on BrowserStack browsers
+        run: npm run test  # See sample test script above
+      - name: 'BrowserStackLocal Stop'  # Terminating the BrowserStackLocal tunnel connection
+        uses: browserstack/github-actions/setup-local@master
+        with:
+          local-testing: stop
