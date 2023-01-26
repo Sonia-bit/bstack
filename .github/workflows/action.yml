@@ -1,32 +1,34 @@
-name: 'BrowserStack'
-on: [push, pull_request]
+name: Github Actions Example
+
+on:
+  pull_request:
+  push:
+    branches: 
+      - master
 
 jobs:
-  ubuntu-job:
-    name: 'BrowserStack Test on Ubuntu'
+  test:
+    name: Running Units Tests
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
     steps:
-      - name: 'BrowserStack Env Setup'
-        uses: 'browserstack/github-actions/setup-env@master'
-        with:
-          username:  ${{secrets.BROWSERSTACK_USERNAME}}
-          access-key: ${{secrets.BROWSERSTACK_ACCESS_KEY}}
-          build-name: BUILD_INFO
-      - name: 'BrowserStackLocal Setup'
-        uses: 'browserstack/github-actions/setup-local@master'
-        with:
-          local-testing: start
-          local-logging-level: all-logs
-          local-identifier: random
-      - name: 'checkout the repository demo'
-        uses: 'actions/checkout@v2'
-      - name: 'running npm install'
-        run: 'npm install -g selenium-webdriver@4.1.2'
-      - name: 'running http-server'
-        run: 'http://hub-cloud.browserstack.com/wd/hub'
-      - name: 'run test'
-        run: 'node index.js'
-      - name: 'BrowserStackLocal Stop'
-        uses: 'browserstack/github-actions/setup-local@master'
-        with:
-          local-testing: stop
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+    - name: 'BrowserStack Env Setup'  # Invokes the setup-env action
+      uses: browserstack/github-actions/setup-env@master
+      with:
+        username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+        access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+    - name: 'BrowserStack Local Tunnel Setup'  # Invokes the setup-local action
+      uses: browserstack/github-actions/setup-local@master
+      with:
+        local-testing: start
+        local-identifier: random
+    - name: Install
+      run: npm install selenium-webdriver
+    - name: Test
+      run: npm run test
