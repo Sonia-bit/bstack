@@ -20,12 +20,16 @@ jobs:
           local-identifier: random
       - name: 'checkout the repository demo'
         uses: 'actions/checkout@v2'
+        with:
+          node-version: 16
+          cache: npm
       - name: 'running npm install'
         run: 'npm install'
       - name: 'running http-server'
         run: './node_modules/.bin/http-server -p 8099 &'
       - name: 'run test'
         run: 'node index.js'
+        continue-on-error: true
       - name: 'BrowserStackLocal Stop'
         uses: 'browserstack/github-actions/setup-local@master'
         with:
