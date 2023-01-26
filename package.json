@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-        "test": "nps test"
+        "test": "npm test"
   },
   "keywords": [],
   "author": "",
